@@ -94,7 +94,7 @@ require (["esri/Map",
 					let layerlist = document.createElement("ul");
 					toc.appendChild(layerlist);
 					//populate layers in list
-					populateLayer(layer, layerlist);
+					populateLayerRecursive(layer, layerlist);
 
 					mapview.goTo(layer.fullExtent)
 
@@ -138,6 +138,60 @@ function populateLayer(thislayer, layerlist)
 	}
 
 }
+
+
+
+ 
+
+//Populate layer subitems in the input element
+function populateLayerRecursive(thislayer, layerlist)
+{
+
+	
+	let chk = document.createElement("input");
+	chk.type = "checkbox";
+	chk.value = thislayer.id;
+	chk.checked = thislayer.visible;
+
+ 
+	chk.addEventListener("click", function(e) 
+		{
+
+		  //let clickedlayer = thislayer.findSublayerById(Number(e.target.value));
+
+		  thislayer.visible=e.target.checked 
+		})
+		 
+
+	let lbl = document.createElement("label");
+	lbl.textContent = thislayer.title;
+
+	let layeritem = document.createElement("li");
+	layeritem.appendChild(chk);
+	layeritem.appendChild(lbl);
+
+	layerlist.appendChild(layeritem);
+
+	if (thislayer.sublayers != null && thislayer.sublayers.items.length > 0)
+	{
+		 let newlist = document.createElement("ul");
+		 layerlist.appendChild(newlist);
+		 for (let i = 0; i < thislayer.sublayers.length; i++)
+	 	 {
+		 	 populateLayerRecursive(thislayer.sublayers.items[i],newlist);
+ 
+	     }
+
+	}
+	//let sublayer = thislayer.sublayers.items[i];
+	
+
+}
+
+
+
+
+
 
 
 //Generate list of buttons for basemaps
