@@ -27,6 +27,10 @@
 let mapview;
 let map;
 let layer;
+let r;
+let Request;
+let selectedService;
+
 //second commit
 require (["esri/Map",
 		 "esri/views/MapView",
@@ -35,10 +39,11 @@ require (["esri/Map",
 		 "esri/widgets/Legend"], 
 		function(Map, 
 			MapView, 
-			Request, 
+			esriRequest, 
 			MapLayer, 
 			Legend)
-		{
+		{	
+			 Request= esriRequest;
 			 generateBasemaps();
 			 map = new Map({basemap:"streets"})
 
@@ -53,8 +58,11 @@ require (["esri/Map",
 		     let url = "https://sampleserver6.arcgisonline.com/arcgis/rest/services?f=json";
 
 		     let options = {responseType: "json"};
-
+		     //getCount(4);
+		     //getCount(9);
 		     Request(url, options).then(populateMapServices);
+
+		    
 
 		     //populate the drop downlist of mapservices 
 		    function populateMapServices (response){
@@ -76,7 +84,7 @@ require (["esri/Map",
 			function onChangeServiceMap()
 			{
 
-				let selectedService = lstservices.options[lstservices.selectedIndex].textContent;
+			    selectedService = lstservices.options[lstservices.selectedIndex].textContent;
 
 					//add layer
 				layer = new MapLayer({url: "https://sampleserver6.arcgisonline.com/arcgis/rest/services/" + selectedService + "/MapServer"})
@@ -106,43 +114,25 @@ require (["esri/Map",
 		);
 
  
-
-//Populate layer subitems in the input element
-function populateLayer(thislayer, layerlist)
+  
+ 
+function getCount(layerid)
 {
+ 	let queryurl = "https://sampleserver6.arcgisonline.com/arcgis/rest/services/" + selectedService + "/MapServer/" + layerid + "/query";
 
-	for (let i = 0; i < thislayer.sublayers.length; i++)
-	{
-		let sublayer = thislayer.sublayers.items[i];
-		let chk = document.createElement("input");
-		chk.type = "checkbox";
-		chk.value = sublayer.id;
-		chk.checked = sublayer.visible;
+	let queryOptions = {
+     					responseType: "json",
+     					query:  
+     					{
+							f: "json",
+							where:"1=1",
+							returnCountOnly: true
+     					}
+     				   }
 
-		chk.addEventListener("click", function(e) 
-			{
-
-			  let clickedlayer = thislayer.findSublayerById(Number(e.target.value));
-
-			  clickedlayer.visible=e.target.checked 
-			})
-
-		let lbl = document.createElement("label");
-		lbl.textContent = sublayer.title;
-
-		let layeritem = document.createElement("li");
-		layeritem.appendChild(chk);
-		layeritem.appendChild(lbl);
-
-		layerlist.appendChild(layeritem);
-	}
+	     Request(queryurl,queryOptions).then (response => alert(response.data.count));
 
 }
-
-
-
- 
-
 //Populate layer subitems in the input element
 function populateLayerRecursive(thislayer, layerlist)
 {
@@ -152,23 +142,20 @@ function populateLayerRecursive(thislayer, layerlist)
 	chk.type = "checkbox";
 	chk.value = thislayer.id;
 	chk.checked = thislayer.visible;
-
- 
-	chk.addEventListener("click", function(e) 
-		{
-
-		  //let clickedlayer = thislayer.findSublayerById(Number(e.target.value));
-
-		  thislayer.visible=e.target.checked 
-		})
-		 
-
+	chk.addEventListener("click", e => thislayer.visible=e.target.checked )
+	 
 	let lbl = document.createElement("label");
 	lbl.textContent = thislayer.title;
+
+	let btn = document.createElement("button");
+	btn.textContent = "Count";
+
+	btn.addEventListener("click", e => getCount(thislayer.id))
 
 	let layeritem = document.createElement("li");
 	layeritem.appendChild(chk);
 	layeritem.appendChild(lbl);
+	layeritem.appendChild(btn);
 
 	layerlist.appendChild(layeritem);
 
