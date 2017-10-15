@@ -116,7 +116,7 @@ require (["esri/Map",
  
   
  
-function getCount(layerid)
+function getCount(layerid, el)
 {
  	let queryurl = "https://sampleserver6.arcgisonline.com/arcgis/rest/services/" + selectedService + "/MapServer/" + layerid + "/query";
 
@@ -130,7 +130,7 @@ function getCount(layerid)
      					}
      				   }
 
-	     Request(queryurl,queryOptions).then (response => alert(response.data.count));
+	     Request(queryurl,queryOptions).then (response => el.textContent = response.data.count, response => el.style.visibility="hidden" );
 
 }
 //Populate layer subitems in the input element
@@ -149,8 +149,8 @@ function populateLayerRecursive(thislayer, layerlist)
 
 	let btn = document.createElement("button");
 	btn.textContent = "Count";
-
-	btn.addEventListener("click", e => getCount(thislayer.id))
+	getCount(thislayer.id, btn);
+	//btn.addEventListener("click", e => getCount(thislayer.id, btn))
 
 	let layeritem = document.createElement("li");
 	layeritem.appendChild(chk);
