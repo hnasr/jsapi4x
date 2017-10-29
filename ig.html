@@ -6,8 +6,8 @@
 	<link rel = "stylesheet" href = "https://js.arcgis.com/4.4/esri/css/main.css">
 </head>
 <body>
-<select id = 'lstservices'></select>
-
+Service: <select id = 'lstservices'></select><br>
+Basemap: <select id = 'buttons'></select>
 <table>
 	<tr>
 		<td valign = top>
@@ -21,7 +21,7 @@
 		
 	</tr>
 </table>
-<div id = 'buttons'></div>
+
 
 <script>
 let mapview;
@@ -30,7 +30,7 @@ let layer;
 let r;
 let Request;
 let selectedService;
-
+const DEFAULT_BASEMAP = "streets"
 //second commit
 require (["esri/Map",
 		 "esri/views/MapView",
@@ -45,7 +45,7 @@ require (["esri/Map",
 		{	
 			 Request= esriRequest;
 			 generateBasemaps();
-			 map = new Map({basemap:"streets"})
+			 map = new Map({basemap:DEFAULT_BASEMAP})
 
 			 let viewoptions = {container: "mapview", map: map, 
 			 center: [-117.1616394868625, 32.7127455035969], scale: 10000}
@@ -190,6 +190,7 @@ function generateBasemaps()
 	basemaps.push ("satellite");
 	basemaps.push ("topo");
 	basemaps.push ("osm");
+	basemaps.push ("streets");
 	basemaps.push ("hybrid");
 	basemaps.push ("terrain");
 	basemaps.push ("dark-gray");
@@ -199,16 +200,23 @@ function generateBasemaps()
 
 
 	//let setBasemap = function (e) { map.basemap = e.target.id }
-	let setBasemap = e => map.basemap = e.target.id;
+	let setBasemap = function (e){
+		let list =  e.target;
+		let selectedBasemap = list.options[list.selectedIndex].textContent;
+		map.basemap = selectedBasemap;
+	} 
+
+	let cmbbasemaps = document.getElementById("buttons");
+	cmbbasemaps.addEventListener("change", setBasemap)
 
 	for (let i = 0; i < basemaps.length; i ++)
 	{
-		let buttons = document.getElementById("buttons");
-		let button = document.createElement("button");
-		button.id = basemaps[i];
-		button.textContent = basemaps[i];
-		button.addEventListener("click", setBasemap)
-		buttons.appendChild(button);
+		let option = document.createElement("option");
+		option.id = basemaps[i];
+		option.textContent = basemaps[i];
+		if (basemaps[i] == DEFAULT_BASEMAP) option.selected = true;
+		
+		cmbbasemaps.appendChild(option);
 	}
 }
 
