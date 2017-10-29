@@ -36,12 +36,14 @@ require (["esri/Map",
 		 "esri/views/MapView",
 		 "esri/request",
 		 "esri/layers/MapImageLayer",
-		 "esri/widgets/Legend"], 
+		 "esri/widgets/Legend",
+		 "esri/widgets/Search"], 
 		function(Map, 
 			MapView, 
 			esriRequest, 
 			MapLayer, 
-			Legend)
+			Legend,
+			Search)
 		{	
 			 Request= esriRequest;
 			 generateBasemaps();
@@ -54,6 +56,9 @@ require (["esri/Map",
 		    
 		     let legend = new Legend({view: mapview});
 		     mapview.ui.add(legend, "bottom-left");
+
+		     let search = new Search({view: mapview});
+		     mapview.ui.add(search, "top-left");
 
 		     let url = "https://sampleserver6.arcgisonline.com/arcgis/rest/services?f=json";
 
@@ -197,7 +202,7 @@ function generateBasemaps()
 	basemaps.push ("national-geographic");
 	basemaps.push ("oceans");
 	basemaps.push ("streets-night-vector");
-
+	basemaps.push ("topo-vector");
 
 	//let setBasemap = function (e) { map.basemap = e.target.id }
 	let setBasemap = function (e){
