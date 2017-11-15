@@ -34,6 +34,7 @@ let r;
 let Request;
 let selectedService;
 const DEFAULT_BASEMAP = "streets"
+const DEFAULT_SERVICE = "Water_Network"
 //second commit
 require (["esri/Map",
 		 "esri/views/MapView",
@@ -84,9 +85,11 @@ require (["esri/Map",
 		     	{
 		     		let option = document.createElement("option");
 		     		option.textContent = result.services[i].name;
+		     		if (DEFAULT_SERVICE == result.services[i].name) option.selected=true;
 		     		lstservices.appendChild(option);
 		     		//alert(result.services[i].name);
 		     	}
+		     	onChangeServiceMap();
 		     }
 
 			function onChangeServiceMap()
