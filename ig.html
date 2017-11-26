@@ -283,8 +283,18 @@ function populateAttributesTable(e)
 	     		for (let i = 0; i < response.data.fields.length; i++)
 		     	{
 		     		let field = response.data.fields[i];
+
 					let column = document.createElement("td");
-					column.textContent = feature.attributes[field.name];
+					
+
+					if (field.type == "esriFieldTypeDate")
+					{
+						let d = new Date(feature.attributes[field.name]);
+						column.textContent = d;
+					}	 
+					else
+						column.textContent = feature.attributes[field.name];
+
 					row.appendChild(column);
 		     	}
 
