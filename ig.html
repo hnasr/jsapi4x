@@ -18,7 +18,6 @@ Basemap: <select id = 'buttons'></select>
 		<td>
 			<div id = 'mapview' style='width:700px;height:500px'>map goes here</div>
 		</td>
-		
 	</tr>
 	<tr>
 		<td colspan = 2><div id = 'attributetable'>ATTRIBUTE TABLE</div></td>
@@ -35,6 +34,8 @@ let Request;
 let selectedService;
 const DEFAULT_BASEMAP = "streets"
 const DEFAULT_SERVICE = "Water_Network"
+const DEFAULT_PAGE_SIZE = 5;
+
 //second commit
 require (["esri/Map",
 		 "esri/views/MapView",
@@ -50,7 +51,9 @@ require (["esri/Map",
 			Search)
 		{	
 			 Request= esriRequest;
+			 
 			 generateBasemaps();
+
 			 map = new Map({basemap:DEFAULT_BASEMAP})
 
 			 let viewoptions = {container: "mapview", map: map, 
@@ -64,32 +67,41 @@ require (["esri/Map",
 		     let search = new Search({view: mapview});
 		     mapview.ui.add(search, "top-left");
 
+		     //query the sample server and list all map services in a dropdown
+		     populateMapServices();
+		
+		     //populate the drop downlist of mapservices 
+		    
+		    function populateMapServices (){
+
+
 		     let url = "https://sampleserver6.arcgisonline.com/arcgis/rest/services?f=json";
 
 		     let options = {responseType: "json"};
-		     //getCount(4);
-		     //getCount(9);
-		     Request(url, options).then(populateMapServices);
+ 
+		     Request(url, options).then
+		     	(
+	     		response => 
+	     		{
 
-		    
+			     	let result = response.data;
+			     	let lstservices = document.getElementById("lstservices");
+			     	//set event listener on change
+			     	lstservices.addEventListener("change", onChangeServiceMap);
 
-		     //populate the drop downlist of mapservices 
-		    function populateMapServices (response){
+			     	for (let i = 0; i< result.services.length; i++)
+			     	{
+			     		let option = document.createElement("option");
+			     		option.textContent = result.services[i].name;
+			     		if (DEFAULT_SERVICE == result.services[i].name) option.selected=true;
+			     		lstservices.appendChild(option);
+			     		//alert(result.services[i].name);
+			     	}
+			     	onChangeServiceMap();
+	     		}
 
-		     	let result = response.data;
-		     	let lstservices = document.getElementById("lstservices");
-		     	//set event listener on change
-		     	lstservices.addEventListener("change", onChangeServiceMap);
+		     	);
 
-		     	for (let i = 0; i< result.services.length; i++)
-		     	{
-		     		let option = document.createElement("option");
-		     		option.textContent = result.services[i].name;
-		     		if (DEFAULT_SERVICE == result.services[i].name) option.selected=true;
-		     		lstservices.appendChild(option);
-		     		//alert(result.services[i].name);
-		     	}
-		     	onChangeServiceMap();
 		     }
 
 			function onChangeServiceMap()
@@ -104,30 +116,30 @@ require (["esri/Map",
 				map.add(layer);
 
 				//wait until the layer is loaded.
-				layer.then
-					(() => 
-					{
-					
-					let toc = document.getElementById("toc");
-					toc.innerHTML = "";
-					let layerlist = document.createElement("ul");
-					toc.appendChild(layerlist);
-					//populate layers in list
-					populateLayerRecursive(layer, layerlist);
-
-					mapview.goTo(layer.fullExtent)
-
-					}
-					)
+				layer.then(buildToc);
 			}
 
 		}
 		);
 
  
-  
  
-function getCount(layerid, el)
+function buildToc()
+{
+ 
+	let toc = document.getElementById("toc");
+	toc.innerHTML = "";
+	let layerlist = document.createElement("ul");
+	toc.appendChild(layerlist);
+	//populate layers in list
+	populateLayerRecursive(layer, layerlist);
+
+	mapview.goTo(layer.fullExtent)
+ 
+
+}
+ 
+function getCount(layerid, featureCount)
 {
  	let queryurl = "https://sampleserver6.arcgisonline.com/arcgis/rest/services/" + selectedService + "/MapServer/" + layerid + "/query";
 
@@ -141,7 +153,9 @@ function getCount(layerid, el)
      					}
      				   }
 
-	     Request(queryurl,queryOptions).then (response => el.textContent = response.data.count, response => el.style.visibility="hidden" );
+	     Request(queryurl,queryOptions).then (
+	     	response =>featureCount(response.data.count)
+	     	, response => featureCount(0) );
 
 }
 //Populate layer subitems in the input element
@@ -156,14 +170,14 @@ function populateLayerRecursive(thislayer, layerlist)
 	chk.addEventListener("click", e => thislayer.visible=e.target.checked )
 	 
 	let lbl = document.createElement("label");
-	lbl.textContent = thislayer.title;
+	lbl.textContent = thislayer.title + "       "
 
 	let btn = document.createElement("button");
-	btn.textContent = "Count";
-	getCount(thislayer.id, btn);
+	btn.textContent = "View";
+	//getCount(thislayer.id, btn);
 	//on click, open the attribute table
 	btn.layerid = thislayer.id;
-	btn.addEventListener("click", populateAttributesTable);
+	btn.addEventListener("click", openAttributesTable);
 
 	let layeritem = document.createElement("li");
 	layeritem.appendChild(chk);
@@ -233,12 +247,24 @@ function generateBasemaps()
 	}
 }
 
-//populate the attribute of a given layer
-function populateAttributesTable(e)
+function openAttributesTable(e)
 {
-	//alert("calling attribute table for Layer " + e.target.layerid);
+	let layerid = e.target.layerid;
+	let featureCount = 0;
+	getCount(layerid, c => { 
+		featureCount = c; 
+		populateAttributesTable(layerid, featureCount)
+	});
 
-	let queryurl = "https://sampleserver6.arcgisonline.com/arcgis/rest/services/" + selectedService + "/MapServer/" + e.target.layerid + "/query";
+
+}
+
+//populate the attribute of a given layer
+function populateAttributesTable(layerid, featureCount)
+{
+
+	alert (featureCount);
+	let queryurl = "https://sampleserver6.arcgisonline.com/arcgis/rest/services/" + selectedService + "/MapServer/" + layerid + "/query";
 
 	let attributetable = document.getElementById("attributetable");
 	attributetable.innerHTML ="";
@@ -251,7 +277,7 @@ function populateAttributesTable(e)
 							where:"1=1",
 							returnCountOnly: false,
 							outFields: "*",
-							resultRecordCount: "50"
+							resultRecordCount: DEFAULT_PAGE_SIZE
      					}
      				   }
 
