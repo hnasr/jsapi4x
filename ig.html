@@ -20,6 +20,9 @@ Basemap: <select id = 'buttons'></select>
 		</td>
 	</tr>
 	<tr>
+		<td colspan = 2><div id = 'pages'>PAGES GOES HERE</div></td>
+	</tr>
+	<tr>
 		<td colspan = 2><div id = 'attributetable'>ATTRIBUTE TABLE</div></td>
 	</tr>
 </table>
@@ -34,7 +37,7 @@ let Request;
 let selectedService;
 const DEFAULT_BASEMAP = "streets"
 const DEFAULT_SERVICE = "Water_Network"
-const DEFAULT_PAGE_SIZE = 5;
+const DEFAULT_PAGE_SIZE = 100;
 
 //second commit
 require (["esri/Map",
@@ -252,10 +255,28 @@ function openAttributesTable(e)
 	let layerid = e.target.layerid;
 	let featureCount = 0;
 	getCount(layerid, c => { 
-		featureCount = c; 
+		featureCount = c;
+		populatePages(featureCount);
 		populateAttributesTable(layerid, featureCount)
 	});
 
+
+}
+
+
+function populatePages(featureCount)
+{
+	let pagesCount = Math.ceil(featureCount / DEFAULT_PAGE_SIZE);
+	let pagesDiv = document.getElementById("pages");
+	pagesDiv.innerHTML = "";
+	for (let i = 0; i < pagesCount; i++)
+	{
+
+		let page = document.createElement("button");
+		page.textContent = i+1;
+		pagesDiv.appendChild(page);
+	}
+	//alert("Page count : " + pagesCount );
 
 }
 
@@ -263,7 +284,7 @@ function openAttributesTable(e)
 function populateAttributesTable(layerid, featureCount)
 {
 
-	alert (featureCount);
+	//alert (featureCount);
 	let queryurl = "https://sampleserver6.arcgisonline.com/arcgis/rest/services/" + selectedService + "/MapServer/" + layerid + "/query";
 
 	let attributetable = document.getElementById("attributetable");
