@@ -256,24 +256,38 @@ function openAttributesTable(e)
 	let featureCount = 0;
 	getCount(layerid, c => { 
 		featureCount = c;
-		populatePages(featureCount);
-		populateAttributesTable(layerid, featureCount)
+		populatePages(layerid, featureCount);
+		populateAttributesTable(layerid, 1, featureCount)
 	});
-
 
 }
 
 
-function populatePages(featureCount)
+let buttonPages =[];
+
+function resetPages()
+{
+	buttonPages.forEach(b => {
+		b.style.color = "black";
+	})
+}
+
+function populatePages(layerid, featureCount)
 {
 	let pagesCount = Math.ceil(featureCount / DEFAULT_PAGE_SIZE);
 	let pagesDiv = document.getElementById("pages");
 	pagesDiv.innerHTML = "";
 	for (let i = 0; i < pagesCount; i++)
 	{
-
 		let page = document.createElement("button");
 		page.textContent = i+1;
+		buttonPages.push(page);
+		page.addEventListener("click", function(e){
+			resetPages();
+			e.target.style.color = "red";
+			populateAttributesTable(layerid, i+1, featureCount);
+
+		})
 		pagesDiv.appendChild(page);
 	}
 	//alert("Page count : " + pagesCount );
@@ -281,7 +295,7 @@ function populatePages(featureCount)
 }
 
 //populate the attribute of a given layer
-function populateAttributesTable(layerid, featureCount)
+function populateAttributesTable(layerid, page,  featureCount)
 {
 
 	//alert (featureCount);
@@ -298,6 +312,7 @@ function populateAttributesTable(layerid, featureCount)
 							where:"1=1",
 							returnCountOnly: false,
 							outFields: "*",
+							resultOffset: (page - 1) * DEFAULT_PAGE_SIZE + 1,
 							resultRecordCount: DEFAULT_PAGE_SIZE
      					}
      				   }
