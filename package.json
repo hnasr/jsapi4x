@@ -1,0 +1,22 @@
+{
+  "name": "jsapi4x",
+  "version": "1.0.0",
+  "description": "ArcGIS Javascript API 4.x YouTube Series rcGIS Javascript API has been there for a while, allowing people to author rich geo-enabled web applications.",
+  "main": "index.js",
+  "scripts": {
+    "start" : "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hnasr/jsapi4x.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hnasr/jsapi4x/issues"
+  },
+  "homepage": "https://github.com/hnasr/jsapi4x#readme",
+  "dependencies": {
+    "express": "^4.16.2"
+  }
+}
