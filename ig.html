@@ -258,6 +258,33 @@ mapview.graphics.add(graphic);
 function drawPolygon (x1,y1, x2, y2, x3, y3)
 {
 
+
+let p = {
+	type: "polygon",
+	rings: [
+		[x1, y1],
+		[x2, y2],
+		[x3, y3],
+		[x1, y1]
+	]
+}
+
+let s = {
+	type: "simple-fill",
+	color: [255,0,0,0.5],
+	style: "backward-diagonal",
+	outline: {
+		width: 5,
+		color: [0,0,255,0.7],
+		style: "solid",
+		cap: "round"
+
+	}
+}
+
+let graphic = new Graphic({geometry: p, symbol: s})
+mapview.graphics.add(graphic);
+
 }
 
 
