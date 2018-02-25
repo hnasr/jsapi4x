@@ -35,6 +35,7 @@ let layer;
 let r;
 let Request;
 let selectedService;
+let Graphic;
 const DEFAULT_BASEMAP = "streets"
 const DEFAULT_SERVICE = "Water_Network"
 const DEFAULT_PAGE_SIZE = 100;
@@ -45,16 +46,18 @@ require (["esri/Map",
 		 "esri/request",
 		 "esri/layers/MapImageLayer",
 		 "esri/widgets/Legend",
-		 "esri/widgets/Search"], 
+		 "esri/widgets/Search",
+		 "esri/Graphic"], 
 		function(Map, 
 			MapView, 
 			esriRequest, 
 			MapLayer, 
 			Legend,
-			Search)
+			Search,
+			GraphicClass)
 		{	
 			 Request= esriRequest;
-			 
+			 Graphic = GraphicClass;
 			 generateBasemaps();
 
 			 map = new Map({basemap:DEFAULT_BASEMAP})
@@ -207,6 +210,34 @@ function populateLayerRecursive(thislayer, layerlist)
 
 
 
+
+function drawPoint (x,y) {
+
+let p = {
+	type: "point",
+	longitude: x,
+	latitude: y
+}
+
+let s = {
+	type: "simple-marker",
+	color: [255,0,0, 0.5],
+	size: 30
+}
+
+let graphic = new Graphic({geometry: p, symbol: s})
+mapview.graphics.add(graphic);
+
+}
+
+function drawLine (x1,y1, x2,y2) {
+
+}
+
+function drawPolygon (x1,y1, x2, y2, x3, y3)
+{
+
+}
 
 
 
