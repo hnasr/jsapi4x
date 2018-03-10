@@ -3,6 +3,8 @@
 <head>
 	<title>IGeometry</title>
 	<script src = 'https://js.arcgis.com/4.5/init.js'></script>
+	<script src = 'toc.js'></script>
+	<script src = 'attributetable.js'></script>
 	<link rel = "stylesheet" href = "https://js.arcgis.com/4.5/esri/css/main.css">
 </head>
 <body>
@@ -132,81 +134,12 @@ require (["esri/Map",
  
 function buildToc()
 {
- 
-	let toc = document.getElementById("toc");
-	toc.innerHTML = "";
-	let layerlist = document.createElement("ul");
-	toc.appendChild(layerlist);
-	//populate layers in list
-	populateLayerRecursive(layer, layerlist);
-
+	//create table of content
+	let toc = new Toc (layer, "toc");
 	mapview.goTo(layer.fullExtent)
- 
-
 }
- 
-function getCount(layerid, featureCount)
-{
- 	let queryurl = "https://sampleserver6.arcgisonline.com/arcgis/rest/services/" + selectedService + "/MapServer/" + layerid + "/query";
 
-	let queryOptions = {
-     					responseType: "json",
-     					query:  
-     					{
-							f: "json",
-							where:"1=1",
-							returnCountOnly: true
-     					}
-     				   }
 
-	     Request(queryurl,queryOptions).then (
-	     	response =>featureCount(response.data.count)
-	     	, response => featureCount(0) );
-
-}
-//Populate layer subitems in the input element
-function populateLayerRecursive(thislayer, layerlist)
-{
-
-	
-	let chk = document.createElement("input");
-	chk.type = "checkbox";
-	chk.value = thislayer.id;
-	chk.checked = thislayer.visible;
-	chk.addEventListener("click", e => thislayer.visible=e.target.checked )
-	 
-	let lbl = document.createElement("label");
-	lbl.textContent = thislayer.title + "       "
-
-	let btn = document.createElement("button");
-	btn.textContent = "View";
-	//getCount(thislayer.id, btn);
-	//on click, open the attribute table
-	btn.layerid = thislayer.id;
-	btn.addEventListener("click", openAttributesTable);
-
-	let layeritem = document.createElement("li");
-	layeritem.appendChild(chk);
-	layeritem.appendChild(lbl);
-	layeritem.appendChild(btn);
-
-	layerlist.appendChild(layeritem);
-
-	if (thislayer.sublayers != null && thislayer.sublayers.items.length > 0)
-	{
-		 let newlist = document.createElement("ul");
-		 layerlist.appendChild(newlist);
-		 for (let i = 0; i < thislayer.sublayers.length; i++)
-	 	 {
-		 	 populateLayerRecursive(thislayer.sublayers.items[i],newlist);
- 
-	     }
-
-	}
-	//let sublayer = thislayer.sublayers.items[i];
-	
-
-}
 
 
 
@@ -313,7 +246,7 @@ function generateBasemaps()
 		let list =  e.target;
 		let selectedBasemap = list.options[list.selectedIndex].textContent;
 		map.basemap = selectedBasemap;
-	} 
+	}
 
 	let cmbbasemaps = document.getElementById("buttons");
 	cmbbasemaps.addEventListener("change", setBasemap)
@@ -329,127 +262,6 @@ function generateBasemaps()
 	}
 }
 
-function openAttributesTable(e)
-{
-	let layerid = e.target.layerid;
-	let featureCount = 0;
-	getCount(layerid, c => { 
-		featureCount = c;
-		populatePages(layerid, featureCount);
-		populateAttributesTable(layerid, 1, featureCount)
-	});
-
-}
-
-
-let buttonPages =[];
-
-function resetPages()
-{
-	buttonPages.forEach(b => {
-		b.style.color = "black";
-	})
-}
-
-function populatePages(layerid, featureCount)
-{
-	let pagesCount = Math.ceil(featureCount / DEFAULT_PAGE_SIZE);
-	let pagesDiv = document.getElementById("pages");
-	pagesDiv.innerHTML = "";
-	for (let i = 0; i < pagesCount; i++)
-	{
-		let page = document.createElement("button");
-		page.textContent = i+1;
-		buttonPages.push(page);
-		page.addEventListener("click", function(e){
-			resetPages();
-			e.target.style.color = "red";
-			populateAttributesTable(layerid, i+1, featureCount);
-
-		})
-		pagesDiv.appendChild(page);
-	}
-	//alert("Page count : " + pagesCount );
-
-}
-
-//populate the attribute of a given layer
-function populateAttributesTable(layerid, page,  featureCount)
-{
-
-	//alert (featureCount);
-	let queryurl = "https://sampleserver6.arcgisonline.com/arcgis/rest/services/" + selectedService + "/MapServer/" + layerid + "/query";
-
-	let attributetable = document.getElementById("attributetable");
-	attributetable.innerHTML ="";
-
-	let queryOptions = {
-     					responseType: "json",
-     					query:  
-     					{
-							f: "json",
-							where:"1=1",
-							returnCountOnly: false,
-							outFields: "*",
-							resultOffset: (page - 1) * DEFAULT_PAGE_SIZE + 1,
-							resultRecordCount: DEFAULT_PAGE_SIZE
-     					}
-     				   }
-
-	     Request(queryurl,queryOptions).then (response => 
-	     {
-
-	     	//alert(response.data.fields.length);
-	     	let table = document.createElement("table");
-	     	table.border = 2;
-	     	let header = document.createElement("tr");
-	     	table.appendChild(header);
-	     	//populate the fields/ columns
-	     	for (let i = 0; i < response.data.fields.length; i++)
-	     	{
-				let column = document.createElement("th");
-				column.textContent = response.data.fields[i].alias;
-				header.appendChild(column);
-	     	}
-
-	     	//loop through all features
-
-
-
-	     	for (let j = 0; j < response.data.features.length; j++)
-	     	{
-	     		let feature = response.data.features[j];
-	     		let row = document.createElement("tr");
-	     		table.appendChild(row);
-	     		for (let i = 0; i < response.data.fields.length; i++)
-		     	{
-		     		let field = response.data.fields[i];
-
-					let column = document.createElement("td");
-					
-
-					if (field.type == "esriFieldTypeDate")
-					{
-						let d = new Date(feature.attributes[field.name]);
-						column.textContent = d;
-					}	 
-					else
-						column.textContent = feature.attributes[field.name];
-
-					row.appendChild(column);
-		     	}
-
-	     	}
-
-
-	     	attributetable.appendChild(table);
-
-
-
-	     }, response => el.style.visibility="hidden" );
-
-
-}
 
 
 
