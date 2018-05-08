@@ -144,12 +144,48 @@ require (["esri/Map",
 		);
 
  
+function projectandZoom(fullExtent) {
+	let url = "https://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/Geometry/GeometryServer/project";
+	
+	let options = {
+			responseType: "json", 
+				query: {
+					f: "json",
+					inSR: JSON.stringify(fullExtent.spatialReference),
+					outSR: 4326,
+					geometries: JSON.stringify({
+							"geometryType" : "esriGeometryPoint",
+							"geometries" : [
+							{"x" : fullExtent.xmin, "y" : fullExtent.ymin},
+							{"x" : fullExtent.xmax, "y" : fullExtent.ymax}
+							]
+							})
+				}
+			};
  
+ Request(url, options)
+ .then (response => {
+	 let fe = {}
+	 let d = response.data;
+	 fe.xmin = d.geometries[0].x;
+	 fe.ymin = d.geometries[0].y;
+	 fe.xmax = d.geometries[1].x;
+	 fe.ymax = d.geometries[1].y;
+	 fe.spatialReference = 4326;
+	 mapview.extent = fe;
+ })
+ .catch (err=> alert(err))
+	 
+
+
+}
+
 function buildToc()
 {
 	//create table of content
 	let toc = new Toc (layer, "toc");
-	mapview.goTo(layer.fullExtent)
+	projectandZoom(layer.fullExtent);
+	//mapview.goTo(layer.fullExtent)
 }
 
 
