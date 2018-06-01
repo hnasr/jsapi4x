@@ -192,6 +192,79 @@ function buildToc()
 
 
 
+function drawGeometry (geometry, cleanup=true) {
+
+	let g;
+	let s;
+
+	//it is a line
+	if (geometry.paths != undefined) 
+	{
+
+		g = {
+			type: "polyline",
+			paths: geometry.paths
+		}
+
+		s = {
+			type: "simple-line",
+			cap: "round",
+			color: [255,0,0,0.5],
+			width: 7,
+			style: "solid"
+		}
+
+	} //it is a polygon
+	else if (geometry.rings != undefined) 
+	{
+
+
+		g = {
+			type: "polygon",
+			rings: geometry.rings
+		}
+
+		s = {
+			type: "simple-fill",
+			color: [255,0,0,0.5],
+			style: "backward-diagonal",
+			outline: {
+				width: 5,
+				color: [0,0,255,0.7],
+				style: "solid",
+				cap: "round"
+
+			}
+		}
+
+
+
+	}
+	else //else its a point
+	{
+		g = {
+			type: "point",
+			longitude: geometry.x,
+			latitude: geometry.y
+		}
+
+		s = {
+			type: "simple-marker",
+			color: [255,0,0, 0.5],
+			size: 30
+		}
+
+	
+	}
+
+	if (cleanup === true) mapview.graphics = [];
+
+	let graphic = new Graphic({geometry: g, symbol: s})
+	mapview.graphics.add(graphic);
+	mapview.goTo(graphic);
+	
+	
+}
 
 function drawPoint (x,y) {
 
@@ -212,7 +285,7 @@ mapview.graphics.add(graphic);
 
 }
 
-function drawLine (x1,y1, x2,y2,x3,y3, cap) {
+function drawLine (x1,y1, x2,y2,x3,y3, cap = "round") {
 
 let l = {
 	type: "polyline",

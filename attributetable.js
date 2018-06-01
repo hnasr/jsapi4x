@@ -78,6 +78,35 @@ populatePages(featureCount)
 }
 
 
+Zoom (e) {
+	let oid = e.target.oid;
+	let url  = e.target.url;
+	
+    //mapservice url sample "https://sampleserver6.arcgisonline.com/arcgis/rest/services/" + selectedService + "/MapServer/"
+    let queryurl = url + "query";
+
+    let queryOptions = {
+                            responseType: "json",
+                            query:  
+                            {
+                                f: "json",
+                                objectIds: oid,
+								returnGeometry: true,
+								outSR: 4326
+                            }
+                            }
+
+        Request(queryurl,queryOptions)
+        .then (response => {
+			//when we get the geometry back, create graphic and zoom..
+		   // alert(JSON.stringify(response.data));
+			//mapview.goTo(response.data.features[0].geometry);
+			drawGeometry(response.data.features[0].geometry);
+		})
+        .catch (err => reject (alert ("ERR: " + err)));	
+
+}
+
 //populate the attribute of a given layer
 populateAttributesTable(page, featureCount)
 {
@@ -108,7 +137,11 @@ populateAttributesTable(page, featureCount)
 	     	table.border = 2;
 	     	let header = document.createElement("tr");
 	     	table.appendChild(header);
-	     	//populate the fields/ columns
+			 //populate the fields/ columns
+			 let zoomHeader = document.createElement("th");
+			 zoomHeader.textContent = "Zoom";
+			 header.appendChild(zoomHeader);
+
 	     	for (let i = 0; i < response.data.fields.length; i++)
 	     	{
 				let column = document.createElement("th");
@@ -123,16 +156,28 @@ populateAttributesTable(page, featureCount)
 	     	for (let j = 0; j < response.data.features.length; j++)
 	     	{
 	     		let feature = response.data.features[j];
-	     		let row = document.createElement("tr");
+				let row = document.createElement("tr");
+				let zoomColumn = document.createElement("td"); 
+				let img = document.createElement("img");
+				img.style.width = "32px";
+				img.style.height = "32px";
+				img.src = "images/zoom.png";
+				img.url = this.mapserviceLayerUrl;
+				img.addEventListener("click", this.Zoom);
+				zoomColumn.appendChild(img);
+				row.appendChild(zoomColumn);
+
 	     		table.appendChild(row);
 	     		for (let i = 0; i < response.data.fields.length; i++)
 		     	{
 		     		let field = response.data.fields[i];
 
 					let column = document.createElement("td");
-					
+					if (field.type === "esriFieldTypeOID") {
+						img.oid = feature.attributes[field.name];
+					}
 
-					if (field.type == "esriFieldTypeDate")
+					if (field.type === "esriFieldTypeDate")
 					{
 						let d = new Date(feature.attributes[field.name]);
 						column.textContent = d;
