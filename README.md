@@ -13,7 +13,7 @@ We are going to have so much fun with this.
 * cd jsapi4x
 * npm install
 * npm run start
-* Then open a browser http://localhost:8080/ig.html
+* Then open a browser http://localhost:8080/
 
 Enjoy
 
