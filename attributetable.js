@@ -50,20 +50,25 @@ getCount()
 }
 
 
-populatePages(featureCount)
+populatePages(featureCount, initPage=1)
 {
 	let pagesCount = Math.ceil(featureCount / DEFAULT_PAGE_SIZE);
 	let pagesDiv = document.getElementById("pages");
-    pagesDiv.innerHTML = "";
-    let AttributeTableinstance = this;
+    //pagesDiv.innerHTML = "";
+	while (pagesDiv.firstChild) 
+		pagesDiv.removeChild(pagesDiv.firstChild);
+
+	let AttributeTableinstance = this;
 	for (let i = 0; i < pagesCount; i++)
 	{
 		let page = document.createElement("button");
 		page.textContent = i+1;
         this.buttonPages.push(page);
         page.attributeTable = this;
-        page.pageNumber = i+1;
-        page.featureCount  = featureCount;
+		page.pageNumber = i+1;
+		//highlight the first page by default
+		if (i+1 === initPage) page.style.color = "red";
+		page.featureCount  = featureCount;
 		page.addEventListener("click", function (e) {
                             AttributeTableinstance.resetPages();
                             e.target.style.color = "red";
