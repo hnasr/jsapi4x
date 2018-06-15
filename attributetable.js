@@ -1,8 +1,9 @@
 class AttributeTable {
     
     //https://sampleserver6.arcgisonline.com/arcgis/rest/services/911CallsHotspot/MapServer/1
-    constructor (mapserviceLayerUrl) {
-        this.buttonPages =[];
+    constructor (mapserviceLayerUrl, mapview) {
+		this.buttonPages =[];
+		this.mapview = mapview;
         this.mapserviceLayerUrl = mapserviceLayerUrl + "/";
  
         this.getCount()
@@ -24,18 +25,24 @@ resetPages()
 
 getCount()
 {	
-
+	const attributeTableInstance = this;
     return new Promise((resolve, reject) => {
 
         //mapservice url sample "https://sampleserver6.arcgisonline.com/arcgis/rest/services/" + selectedService + "/MapServer/"
         let queryurl = this.mapserviceLayerUrl + "query";
+		let extent = undefined;
 
+		if (mapview.useExtent) extent = JSON.stringify(attributeTableInstance.mapview.extent);
         let queryOptions = {
-                            responseType: "json",
+							responseType: "json",
                             query:  
                             {
                                 f: "json",
-                                where:"1=1",
+								where:"1=1",
+								geometry: extent,
+								inSR: JSON.stringify(attributeTableInstance.mapview.extent.spatialReference),
+								geometryType: "esriGeometryEnvelope",
+								spatialRel: "esriSpatialRelEnvelopeIntersects",
                                 returnCountOnly: true
                             }
                             }
@@ -45,7 +52,7 @@ getCount()
         .catch (err => reject (0));
      }
     );
-	
+
 
 }
 
@@ -121,15 +128,23 @@ populateAttributesTable(page, featureCount)
 	let attributetable = document.getElementById("attributetable");
 	attributetable.innerHTML ="";
 
+	let extent = undefined;
+
+	if (mapview.useExtent) extent = JSON.stringify(this.mapview.extent);
+
 	let queryOptions = {
      					responseType: "json",
      					query:  
      					{
 							f: "json",
 							where:"1=1",
+							geometry: extent,
+							inSR: JSON.stringify(this.mapview.extent.spatialReference),
+							geometryType: "esriGeometryEnvelope",
+							spatialRel: "esriSpatialRelEnvelopeIntersects",
 							returnCountOnly: false,
 							outFields: "*",
-							resultOffset: (page - 1) * DEFAULT_PAGE_SIZE + 1,
+							resultOffset: (page - 1) * DEFAULT_PAGE_SIZE,
 							resultRecordCount: DEFAULT_PAGE_SIZE
      					}
      				   }

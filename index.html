@@ -11,6 +11,7 @@
 ArcGIS Server Url: <input id = 'txtArcGISServerUrl' style = 'width:500px' value = 'https://sampleserver6.arcgisonline.com/arcgis/rest/services'> <button id = 'btnLoadService'>Load Service</button><br/>
 Service: <select id = 'lstservices'></select><br>
 Basemap: <select id = 'buttons'></select>
+Use Current Extent: <input type = 'checkbox' checked id = 'chkExtent'>
 <table border = 1>
 	<tr>
 		<td valign = top>
@@ -42,6 +43,7 @@ let Graphic;
 const DEFAULT_BASEMAP = "streets"
 const DEFAULT_SERVICE = "USA" //"Water_Network"
 const DEFAULT_PAGE_SIZE = 25;
+const DEFAULT_USE_EXTENT = true;
 
 //second commit
 require (["esri/Map",
@@ -69,7 +71,7 @@ require (["esri/Map",
 			 center: [-117.1616394868625, 32.7127455035969], scale: 10000}
 
 		     mapview = new MapView(viewoptions);
-		    
+		     mapview.useExtent = DEFAULT_USE_EXTENT;
 		     let legend = new Legend({view: mapview});
 		     mapview.ui.add(legend, "bottom-left");
 
@@ -97,7 +99,10 @@ require (["esri/Map",
 			     	let lstservices = document.getElementById("lstservices");
 			     	//set event listener on change
 			     	lstservices.addEventListener("change", onChangeServiceMap);
-
+					//set event on checkbox
+					const chkExtent = document.getElementById("chkExtent");
+					chkExtent.checked = DEFAULT_USE_EXTENT;
+				    chkExtent.addEventListener("change", e => onChangeExtentStatus())
 			     	for (let i = 0; i< result.services.length; i++)
 			     	{	
 						if (result.services[i].type === "MapServer") {
@@ -117,6 +122,14 @@ require (["esri/Map",
 
 		     }
 
+			
+			function onChangeExtentStatus()
+			{
+				
+				if (mapview != undefined)
+					mapview.useExtent =  document.getElementById("chkExtent").checked;
+				
+			}
 			function onChangeServiceMap()
 			{
 
@@ -183,7 +196,7 @@ function projectandZoom(fullExtent) {
 function buildToc()
 {
 	//create table of content
-	let toc = new Toc (layer, "toc");
+	let toc = new Toc (layer, "toc", mapview);
 	projectandZoom(layer.fullExtent);
 	//mapview.goTo(layer.fullExtent)
 }
