@@ -7,10 +7,7 @@ class AttributeTable {
         this.mapserviceLayerUrl = mapserviceLayerUrl + "/";
  
         this.getCount()
-        .then (c => {  
-            this.populatePages(c);
-            this.populateAttributesTable(1, c)
-        })
+        .then (c =>  this.populatePages(c))
         .catch (err => alert("error! " + err))
 
     }
@@ -57,7 +54,7 @@ getCount()
 }
 
 
-populatePages(featureCount, initPage=1)
+populatePages(featureCount, initPage=1, initSet = 0)
 {
 	let pagesCount = Math.ceil(featureCount / DEFAULT_PAGE_SIZE);
 	let pagesDiv = document.getElementById("pages");
@@ -66,7 +63,11 @@ populatePages(featureCount, initPage=1)
 		pagesDiv.removeChild(pagesDiv.firstChild);
 
 	let AttributeTableinstance = this;
-	for (let i = 0; i < pagesCount; i++)
+	let pagesTodraw = DEFAULT_SET_PAGE_SIZE
+	if (pagesCount - initSet < DEFAULT_SET_PAGE_SIZE)
+		pagesTodraw = pagesCount - initSet;
+
+	for (let i = initSet; i < initSet + pagesTodraw; i++)
 	{
 		let page = document.createElement("button");
 		page.textContent = i+1;
@@ -74,17 +75,32 @@ populatePages(featureCount, initPage=1)
         page.attributeTable = this;
 		page.pageNumber = i+1;
 		//highlight the first page by default
-		if (i+1 === initPage) page.style.color = "red";
+		
 		page.featureCount  = featureCount;
 		page.addEventListener("click", function (e) {
                             AttributeTableinstance.resetPages();
                             e.target.style.color = "red";
                             AttributeTableinstance.populateAttributesTable(i+1, featureCount);
-                        }
-        );
-
+						}
+		
+		);
+		
+		if (i+1 === initPage) {page.style.color = "red"; page.click()}
+		 
+		
 		pagesDiv.appendChild(page);
 	}
+
+	let nextSet = document.createElement("button");
+		nextSet.textContent = "Next";
+		nextSet.disabled = pagesCount - initSet < DEFAULT_SET_PAGE_SIZE
+		nextSet.addEventListener("click", function (e) {
+			AttributeTableinstance.resetPages();
+			AttributeTableinstance.populatePages(featureCount, initSet + DEFAULT_SET_PAGE_SIZE + 1, initSet + DEFAULT_SET_PAGE_SIZE);
+		});
+	pagesDiv.appendChild(nextSet);
+
+
 	//alert("Page count : " + pagesCount );
 
 }
