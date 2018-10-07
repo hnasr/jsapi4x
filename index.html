@@ -2,10 +2,10 @@
 <html>
 <head>
 	<title>IGeometry</title>
-	<script src = 'https://js.arcgis.com/4.5/init.js'></script>
+	<script src = 'https://js.arcgis.com/4.9/init.js'></script>
 	<script src = 'toc.js'></script>
 	<script src = 'attributetable.js'></script>
-	<link rel = "stylesheet" href = "https://js.arcgis.com/4.5/esri/css/main.css">
+	<link rel = "stylesheet" href = "https://js.arcgis.com/4.9/esri/css/main.css">
 </head>
 <body>
 ArcGIS Server Url: <input id = 'txtArcGISServerUrl' style = 'width:500px' value = 'https://sampleserver6.arcgisonline.com/arcgis/rest/services'> <button id = 'btnLoadService'>Load Service</button><br/>
@@ -20,7 +20,7 @@ Use Current Extent: <input type = 'checkbox' checked id = 'chkExtent'>
 			</div>
 		</td>
 		<td>
-			<div id = 'mapview' style='width:700px;height:500px'>map goes here</div>
+			<div id = 'mapview' style='width:700px;height:500px'></div>
 		</td>
 	</tr>
 	<tr>
@@ -142,7 +142,7 @@ require (["esri/Map",
 				map.add(layer);
 
 				//wait until the layer is loaded.
-				layer.then(buildToc);
+				layer.when(buildToc);
 			}
 
 
